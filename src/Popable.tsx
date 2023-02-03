@@ -7,7 +7,6 @@ import React, {
   useState,
 } from 'react';
 import {
-  Dimensions,
   LayoutRectangle,
   Platform,
   // @ts-ignore
@@ -33,7 +32,6 @@ export type PopableProps = {
   numberOfLines?: PopoverProps['numberOfLines'];
   onAction?: (visible: boolean) => void;
   position?: PopoverProps['position'];
-  strictPosition?: boolean;
   style?: PopoverProps['style'];
   visible?: boolean;
   wrapperStyle?: ViewProps['style'];
@@ -62,7 +60,6 @@ const Popable = forwardRef<PopableManager, PopableProps>(function Popable(
     numberOfLines,
     onAction,
     position = 'top',
-    strictPosition = false,
     style,
     visible,
     wrapperStyle,
@@ -81,10 +78,9 @@ const Popable = forwardRef<PopableManager, PopableProps>(function Popable(
     top: 0,
   });
   const [childrenLayout, setChildrenLayout] = useState(DEFAULT_LAYOUT);
-  const [computedPosition, setComputedPosition] = useState(position);
+  const computedPosition = position;
   const isInteractive = typeof visible === 'undefined';
   const isPopoverVisible = isInteractive ? popoverVisible : visible;
-  const [caretOffset, setCaretOffset] = useState(0);
   const childrenRef = useRef<View>(null);
   const popoverRef = useRef<View>(null);
 
@@ -223,7 +219,6 @@ const Popable = forwardRef<PopableManager, PopableProps>(function Popable(
           Platform.OS !== 'web' && (
             <Popover
               isModal={isModal}
-              caretOffset={caretOffset}
               {...sharedPopoverProps}
               forceInitialAnimation
               visible={isPopoverVisible}
@@ -243,7 +238,6 @@ const Popable = forwardRef<PopableManager, PopableProps>(function Popable(
       </Backdrop>
 
       <Popover
-        caretOffset={caretOffset}
         isModal={isModal}
         ref={popoverRef}
         {...sharedPopoverProps}

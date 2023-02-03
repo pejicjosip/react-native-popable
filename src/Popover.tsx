@@ -21,7 +21,7 @@ export type PopoverProps = {
   numberOfLines?: number;
   visible?: boolean;
   position?: 'top' | 'right' | 'bottom' | 'left';
-  caretOffset: number;
+
   isModal: boolean;
 } & ViewProps;
 
@@ -38,7 +38,7 @@ const Popover = React.forwardRef<View, PopoverProps>(function Popover(
     visible = true,
     position = 'bottom',
     style,
-    caretOffset,
+
     isModal,
     ...extraProps
   },
