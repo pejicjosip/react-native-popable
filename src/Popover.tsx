@@ -1,6 +1,5 @@
 import React, { useEffect, useRef } from 'react';
 import { Animated, StyleSheet, Text, View, ViewProps } from 'react-native';
-import Caret from './Caret';
 import { ANIMATION_DURATION } from './constants';
 import {
   POPOVER_BACKGROUND_COLOR,
@@ -83,16 +82,6 @@ const Popover = React.forwardRef<View, PopoverProps>(function Popover(
     [visible] // eslint-disable-line react-hooks/exhaustive-deps
   );
 
-  const caret = (
-    <Caret
-      caretOffset={caretOffset}
-      align={caretPosition}
-      position={position}
-      backgroundColor={backgroundColor}
-      style={styles.caret}
-    />
-  );
-
   let animationTranslation: any;
 
   if (isHorizontalLayout) {
@@ -124,11 +113,6 @@ const Popover = React.forwardRef<View, PopoverProps>(function Popover(
           isHorizontalLayout && styles.containerHorizontal,
         ]}
       >
-        {/* {!isModal &&
-          withCaret &&
-          (position === 'bottom' || position === 'right') &&
-          caret} */}
-
         <View
           style={[
             styles.content,
@@ -144,11 +128,6 @@ const Popover = React.forwardRef<View, PopoverProps>(function Popover(
             children
           )}
         </View>
-
-        {/* {!isModal &&
-          withCaret &&
-          (position === 'top' || position === 'left') &&
-          caret} */}
       </Animated.View>
     </View>
   );
