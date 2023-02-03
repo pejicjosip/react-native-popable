@@ -22,6 +22,8 @@ export type PopoverProps = {
   numberOfLines?: number;
   visible?: boolean;
   position?: 'top' | 'right' | 'bottom' | 'left';
+  caretOffset: number;
+  isModal: boolean;
 } & ViewProps;
 
 const Popover = React.forwardRef<View, PopoverProps>(function Popover(
@@ -37,6 +39,8 @@ const Popover = React.forwardRef<View, PopoverProps>(function Popover(
     visible = true,
     position = 'bottom',
     style,
+    caretOffset,
+    isModal,
     ...extraProps
   },
   ref
@@ -81,6 +85,7 @@ const Popover = React.forwardRef<View, PopoverProps>(function Popover(
 
   const caret = (
     <Caret
+      caretOffset={caretOffset}
       align={caretPosition}
       position={position}
       backgroundColor={backgroundColor}
@@ -119,7 +124,10 @@ const Popover = React.forwardRef<View, PopoverProps>(function Popover(
           isHorizontalLayout && styles.containerHorizontal,
         ]}
       >
-        {withCaret && (position === 'bottom' || position === 'right') && caret}
+        {/* {!isModal &&
+          withCaret &&
+          (position === 'bottom' || position === 'right') &&
+          caret} */}
 
         <View
           style={[
@@ -137,7 +145,10 @@ const Popover = React.forwardRef<View, PopoverProps>(function Popover(
           )}
         </View>
 
-        {withCaret && (position === 'top' || position === 'left') && caret}
+        {/* {!isModal &&
+          withCaret &&
+          (position === 'top' || position === 'left') &&
+          caret} */}
       </Animated.View>
     </View>
   );
@@ -146,7 +157,6 @@ const Popover = React.forwardRef<View, PopoverProps>(function Popover(
 const styles = StyleSheet.create({
   container: {
     width: POPOVER_WIDTH,
-    overflow: 'hidden',
   },
   containerHorizontal: {
     flexDirection: 'row',
@@ -156,7 +166,6 @@ const styles = StyleSheet.create({
     zIndex: 1,
     backgroundColor: POPOVER_BACKGROUND_COLOR,
     borderRadius: BORDER_RADIUS * 2,
-    overflow: 'hidden',
   },
   contentTextOnly: {
     padding: POPOVER_PADDING,

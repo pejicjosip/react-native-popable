@@ -7,6 +7,8 @@ import React, {
   useState,
 } from 'react';
 import {
+  Dimensions,
+  LayoutRectangle,
   Platform,
   // @ts-ignore
   Pressable,
@@ -35,6 +37,9 @@ export type PopableProps = {
   style?: PopoverProps['style'];
   visible?: boolean;
   wrapperStyle?: ViewProps['style'];
+  isModal: boolean;
+  tooltipOffset: number;
+  height: number;
 };
 
 const DEFAULT_LAYOUT = {
@@ -61,6 +66,9 @@ const Popable = forwardRef<PopableManager, PopableProps>(function Popable(
     style,
     visible,
     wrapperStyle,
+    isModal,
+    tooltipOffset,
+    height,
   },
   ref
 ) {
@@ -76,6 +84,7 @@ const Popable = forwardRef<PopableManager, PopableProps>(function Popable(
   const [computedPosition, setComputedPosition] = useState(position);
   const isInteractive = typeof visible === 'undefined';
   const isPopoverVisible = isInteractive ? popoverVisible : visible;
+  const [caretOffset, setCaretOffset] = useState(0);
   const childrenRef = useRef<View>(null);
   const popoverRef = useRef<View>(null);
 
@@ -105,7 +114,26 @@ const Popable = forwardRef<PopableManager, PopableProps>(function Popable(
         if (!visible) {
           popoverRef.current?.measure(
             (_x, _y, _width, _height, pageX, pageY) => {
-              setPopoverPagePosition({ left: pageX, top: pageY });
+              let xPosition = 0;
+              let yPosition = 0;
+
+              if (_x + _width / 2 < pageX) {
+                xPosition = pageX - 70;
+              } else if (_x + _width / 2 > pageX) {
+                xPosition = pageX + 70;
+              }
+
+              if (dimensions.height - 120 < pageY) {
+                yPosition = pageY - (height + 50);
+              } else if (dimensions.height - 120 > pageY) {
+                yPosition = pageY;
+              }
+              setPopoverPagePosition({
+                left: xPosition,
+                top: isModal
+                  ? yPosition + tooltipOffset + 25
+                  : yPosition + tooltipOffset,
+              });
             }
           );
         }
@@ -126,51 +154,24 @@ const Popable = forwardRef<PopableManager, PopableProps>(function Popable(
     onAction?.(false);
   }, [onAction]);
 
-  const handlePopoverLayout = useCallback(() => {
-    popoverRef.current?.measureInWindow((x, y, width, height) => {
-      setPopoverLayout({ x, y, width, height });
-    });
-  }, [popoverRef]);
+  const handlePopoverLayout = useCallback(
+    (event: LayoutRectangle) => {
+      setPopoverLayout({
+        x: event.x,
+        y: event.y,
+        width: event.width,
+        height: event.height,
+      });
+    },
+    [popoverRef]
+  );
 
   const handleChildrenLayout = useCallback(() => {
     childrenRef.current?.measureInWindow((x, y, width, height) => {
       setChildrenLayout({ x, y, width, height });
+      console.log('child', childrenLayout.height);
     });
   }, [childrenRef]);
-
-  useEffect(() => {
-    let nextPosition = position;
-
-    if (!strictPosition) {
-      switch (position) {
-        case 'left':
-          if (popoverLayout.x <= 0) {
-            nextPosition = 'right';
-          }
-          break;
-
-        case 'right':
-          if (popoverLayout.x + popoverLayout.width > dimensions.width) {
-            nextPosition = 'left';
-          }
-          break;
-
-        case 'top':
-          if (popoverLayout.y <= 0) {
-            nextPosition = 'bottom';
-          }
-          break;
-
-        case 'bottom':
-          if (popoverLayout.y + popoverLayout.height >= dimensions.height) {
-            nextPosition = 'top';
-          }
-          break;
-      }
-    }
-
-    setComputedPosition(nextPosition);
-  }, [position, strictPosition, popoverLayout, childrenLayout, dimensions]);
 
   useEffect(() => {
     let left = 0;
@@ -221,6 +222,8 @@ const Popable = forwardRef<PopableManager, PopableProps>(function Popable(
           // `visible` set to `false`)
           Platform.OS !== 'web' && (
             <Popover
+              isModal={isModal}
+              caretOffset={caretOffset}
               {...sharedPopoverProps}
               forceInitialAnimation
               visible={isPopoverVisible}
@@ -240,9 +243,11 @@ const Popable = forwardRef<PopableManager, PopableProps>(function Popable(
       </Backdrop>
 
       <Popover
+        caretOffset={caretOffset}
+        isModal={isModal}
         ref={popoverRef}
         {...sharedPopoverProps}
-        onLayout={handlePopoverLayout}
+        onLayout={(event) => handlePopoverLayout(event.nativeEvent.layout)}
         visible={Platform.OS === 'web' ? isPopoverVisible : false}
         style={[
           computedPosition === 'top' && styles.popoverTop,

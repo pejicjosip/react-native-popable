@@ -12,20 +12,33 @@ export type CaretProps = {
   align: 'left' | 'center' | 'right';
   position: PopoverProps['position'];
   style?: ViewProps['style'];
+  caretOffset: number;
 };
 
-export default ({ align, backgroundColor, position, style }: CaretProps) => {
+export default ({
+  align,
+  backgroundColor,
+  position,
+  style,
+  caretOffset,
+}: CaretProps) => {
   return (
     <View
       style={[
         styles.container,
-        align === 'center' && styles.containerCenter,
+        align === 'center' && {
+          ...styles.containerCenter,
+          alignSelf: caretOffset !== 0 ? undefined : 'center',
+          marginLeft: caretOffset !== 0 ? 165 : 0,
+        },
         align === 'right' && styles.containerRight,
         !!backgroundColor && { backgroundColor },
         position === 'top' && styles.containerPositionTop,
         position === 'bottom' && styles.containerPositionBottom,
         position === 'left' && styles.containerPositionLeft,
         position === 'right' && styles.containerPositionRight,
+
+        ,
         style,
       ]}
     />
